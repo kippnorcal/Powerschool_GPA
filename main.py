@@ -19,13 +19,14 @@ def login():
     time.sleep(1) # Button pause for 1 second
 
 
+'''
 def html_to_df(html, school, grade): # Creating a virtual data table from the website table 
     df_list = pd.read_html(html, header=0) # Importing a list  
     df = df_list[0] # Retrun the first value inside the dataframe list 
     df['school'] = school # Passing variable school into the dataframe
     df['grade'] = grade # Passing variable grade into the dataframe 
     return df # Return dataframe 
-
+''' 
 
 def select_school(school_name): # Selecting the School through school_name parameter 
     school_link = browser.find_element_by_id('schoolContext') # Finding the web element for school button (elements matching id attribute)
