@@ -18,6 +18,12 @@ def login():
     submit_button.click() # Clicking the submit button 
     time.sleep(1) # Button pause for 1 second
 
+def search_bar():       
+    search_bar = browser.find_element_by_id('searchBar')
+    #search_bar.send_keys(
+    search_bar.send_keys('grade_level > 8')
+
+
 
 '''
 def html_to_df(html, school, grade): # Creating a virtual data table from the website table 
