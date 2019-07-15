@@ -24,11 +24,14 @@ def search_bar():
     search_bar.click() 
     time.sleep(1)
 
-'''def direct_quickExport(): 
-    browser.get(f"{os.getenv('QE_URL')}/importexport/exportstudents.html?dothisfor=selected")'''
-
-def text_box():
-    
+def direct_quickExport(): 
+    browser.get(f"{os.getenv('QE_URL')}/importexport/exportstudents.html?dothisfor=selected")
+    text_box = browser.find_element_by_id('quickExport')
+    text_box.send_keys(os.getenv("QUICK_EXPORT"))
+    text_bar.click()
+    submit_btn = browser.find_element_by_id('btn')
+    submit_btn.click()
+    time.sleep(1)
 
 #example for url_quick_export delete this function after 
 '''def class_ranking_report(): # Class Ranking Report function 
