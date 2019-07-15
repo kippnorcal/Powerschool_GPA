@@ -20,11 +20,22 @@ def login():
 
 def search_bar():       
     search_bar = browser.find_element_by_id('searchBar')
-    #search_bar.send_keys(
-    search_bar.send_keys('grade_level > 8')
+    search_bar.send_keys(os.getenv("SEARCH"))
+    search_bar.click() 
+    time.sleep(1)
 
+'''def direct_quickExport(): 
+    browser.get(f"{os.getenv('QE_URL')}/importexport/exportstudents.html?dothisfor=selected")'''
 
+def text_box():
+    
 
+#example for url_quick_export delete this function after 
+'''def class_ranking_report(): # Class Ranking Report function 
+    report_url = f"{os.getenv('PS_URL')}/reports/classranking1.html" # Returning the value of the environment variable
+    browser.get(report_url) # Go to the browser (Firefox) to get the reports url
+    report_options(10) # Report options value 10 
+    time.sleep(1) # Button pause for 1 second'''
 '''
 def html_to_df(html, school, grade): # Creating a virtual data table from the website table 
     df_list = pd.read_html(html, header=0) # Importing a list  
