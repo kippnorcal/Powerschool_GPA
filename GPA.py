@@ -5,6 +5,8 @@ from selenium import webdriver
 import bs4
 import pandas as pdpi
 
+
+
 def create_driver():
     profile = webdriver.FirefoxProfile()
     profile.set_preference("browser.download.folderList", 2)
@@ -12,9 +14,6 @@ def create_driver():
     profile.set_preference("browser.download.dir", CWD)
     profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf")
     profile.set_preference("pdfjs.disabled", True)
-    # options = Options()
-    # options.headless = True
-    # return webdriver.Firefox(options=options, firefox_profile=profile)
     return webdriver.Firefox(firefox_profile=profile)
 
 def login(browser):
@@ -49,17 +48,17 @@ def close(browser):
     browser.close()
 
 def main():
-        try:
-            browser = create_driver()
-            browser.implicitly_wait(10)
-            login(browser)
-            search_bar(browser)
-            direct_quickExport(browser)
+    try:
+        browser = create_driver()
+        browser.implicitly_wait(10)
+        login(browser)
+        search_bar(browser)
+        direct_quickExport(browser)
 
-        except Exception as e:
-            print(e)
-        finally:
-            close(browser) 
+    except Exception as e:
+        print(e)
+    finally:
+        close(browser) 
 
 if __name__ == "__main__":
-        main() 
+    main() 
