@@ -5,7 +5,6 @@ from selenium import webdriver
 import bs4
 import pandas as pdpi
 
-
 browser = webdriver.Firefox()
 
 def login():
@@ -29,23 +28,23 @@ def search_bar():
 def direct_quickExport(): 
     QE_URL = f"{os.getenv('PS_URL')}/importexport/exportstudents.html?dothisfor=selected"
     browser.get(QE_URL)
-    text_box = browser.find_element_by_id('tt')
-    text_box.send_keys(os.getenv("QUICK_EXPORT"))
+    #text_box = browser.find_element_by_id('tt')
+    #text_box.send_keys(os.getenv("QUICK_EXPORT"))
+    time.sleep(5)
     submit_btn = browser.find_element_by_id('btnSubmit')
     submit_btn.click()
-    time.sleep(1)
+    time.sleep(5)
 
 def main():
         try:
             login()
             search_bar()
             direct_quickExport()
-        
+            
         except Exception as e:
             print(e)
         finally:
             browser.quit() 
-
 
 if __name__ == "__main__":
         main() 
