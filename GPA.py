@@ -2,9 +2,7 @@ import os
 import time
 import traceback
 from selenium import webdriver
-import bs4
-import pandas as pdpi
-import argparse
+import pandas as pd
 from db import Connection
 
 
@@ -50,26 +48,22 @@ def close(browser):
 
 def main():
     try:
-        browser = create_driver()
-        browser.implicitly_wait(10)
-        login(browser)
-        search_bar(browser)
-        direct_quickExport(browser)
+        # browser = create_driver()
+        # browser.implicitly_wait(10)
+        # login(browser)
+        # search_bar(browser)
+        # direct_quickExport(browser)
+        df = pd.read_csv('student_export.txt', sep="\t") # Read csv file on args.filepath 
+        df.rename(columns={'student_number':'student_number','lastfirst':'lastfirst','grade_level':'grade_level','[39]name':'School','^(*gpa method="KSJC Simple Transcripts Only" format=##0.00)':'Cumulative_GPA','^(*gpa method="Weighted" format=##0.00 grade="9,10,11,12")':'Cumulative_Weighted_GPA'})
+        conn = Connection() # Send commands and receive back information
+        conn.insert_into("PS_GPA", df) # Insert coonections to the PS_GPA table 
+        print("success")
     except Exception as e:
         print(e)
-    finally:
-        close(browser) 
+    # finally:
+    #     close(browser) 
 
-    parser = argparse.ArgumentParser() # Holds all information necessary to parse the command line into data types
-    parser.add_argument("--filepath", help="file path of csv to parse") # Information about filepath to file path of csv to parse
-    parser.add_argument("--tablename", help="name of the destination sql table") # Information about tablename to name of the destination sql table
-    args = parser.parse_args()# Stores information on filepath and tablename when parse_args() is called
-    file = args.filepath # Put all filepath information to file 
-    table = args.tablename # Put all tablename information to table 
-
-    df = pd.read_csv(file, sep="\t") # Read csv file on args.filepath 
-    conn = Connection() # Send commands and receive back information
-    conn.insert_into("PS_GPA", df) # Insert coonections to the PS_GPA table 
+    
 
 if __name__ == "__main__":
     main() 
