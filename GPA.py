@@ -17,23 +17,23 @@ def create_driver():
 
 def login(browser):
     PS_URL = f"{os.getenv('PS_URL')}/pw.html"
-    browser.get(PS_URL) 
-    user_field = browser.find_element_by_id('fieldUsername') 
-    user_field.send_keys(os.getenv("USER")) 
-    pwd_field = browser.find_element_by_id('fieldPassword') 
-    pwd_field.send_keys(os.getenv("PWD")) 
+    browser.get(PS_URL)
+    user_field = browser.find_element_by_id('fieldUsername')
+    user_field.send_keys(os.getenv("USER"))
+    pwd_field = browser.find_element_by_id('fieldPassword')
+    pwd_field.send_keys(os.getenv("PWD"))
     submit_button = browser.find_element_by_id('btnEnter')
-    submit_button.click() 
-    time.sleep(5) 
-
-def search_bar(browser):       
-    search_bar = browser.find_element_by_id('studentSearchInput')
-    search_bar.send_keys(os.getenv("SEARCH"))
-    search_button = browser.find_element_by_id('searchButton') 
-    search_button.click() 
+    submit_button.click()
     time.sleep(5)
 
-def direct_quickExport(browser): 
+def search_bar(browser):
+    search_bar = browser.find_element_by_id('studentSearchInput')
+    search_bar.send_keys(os.getenv("SEARCH"))
+    search_button = browser.find_element_by_id('searchButton')
+    search_button.click()
+    time.sleep(5)
+
+def direct_quickExport(browser):
     QE_URL = f"{os.getenv('PS_URL')}/importexport/exportstudents.html?dothisfor=selected"
     browser.get(QE_URL)
     #text_box = browser.find_element_by_id('tt')
@@ -53,17 +53,24 @@ def main():
         # login(browser)
         # search_bar(browser)
         # direct_quickExport(browser)
-        df = pd.read_csv('student_export.txt', sep="\t") # Read csv file on args.filepath 
-        df.rename(columns={'student_number':'student_number','lastfirst':'lastfirst','grade_level':'grade_level','[39]name':'School','^(*gpa method="KSJC Simple Transcripts Only" format=##0.00)':'Cumulative_GPA','^(*gpa method="Weighted" format=##0.00 grade="9,10,11,12")':'Cumulative_Weighted_GPA'})
+        df = pd.read_csv('student_export.txt', sep="\t") # Read csv file on args.filepath
+        data_map = {
+            'student_number':'student_number',
+            'lastfirst':'lastfirst',
+            'grade_level':'grade_level',
+            '[39]name':'School',
+            '^(*gpa method="KSJC Simple Transcripts Only" format=##0.00)':'Cumulative_GPA',
+            '^(*gpa method="Weighted" format=##0.00 grade="9,10,11,12")':'Cumulative_Weighted_GPA',
+        }
+        df.rename(columns=data_map, inplace=True)
         conn = Connection() # Send commands and receive back information
-        conn.insert_into("PS_GPA", df) # Insert coonections to the PS_GPA table 
+        conn.insert_into("PS_GPA", df) # Insert coonections to the PS_GPA table
         print("success")
     except Exception as e:
         print(e)
     # finally:
-    #     close(browser) 
+    #     close(browser)
 
-    
 
 if __name__ == "__main__":
-    main() 
+    main()
