@@ -6,7 +6,8 @@ name = "pypi"
 [packages]
 selenium = "*"
 pandas = "*"
-lxml = "*"
+sqlalchemy = "*"
+pyodbc = "*"
 
 [dev-packages]
 
