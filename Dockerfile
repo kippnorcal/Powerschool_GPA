@@ -21,4 +21,4 @@ RUN pip install pipenv
 RUN pipenv install --skip-lock
 COPY ./ .
 ENV MOZ_HEADLESS=0
-CMD ["pipenv", "run", "python", "GPA.py"]
+CMD ["pipenv", "run", "python", "main.py"]
