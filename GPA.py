@@ -36,8 +36,8 @@ def search_bar(browser):
 def direct_quickExport(browser):
     QE_URL = f"{os.getenv('PS_URL')}/importexport/exportstudents.html?dothisfor=selected"
     browser.get(QE_URL)
-    #text_box = browser.find_element_by_id('tt')
-    #text_box.send_keys(os.getenv("QUICK_EXPORT"))
+    text_box = browser.find_element_by_id('tt')
+    text_box.send_keys(os.getenv("QUICK_EXPORT"))
     time.sleep(5)
     submit_btn = browser.find_element_by_id('btnSubmit')
     submit_btn.click()
@@ -48,12 +48,12 @@ def close(browser):
 
 def main():
     try:
-        # browser = create_driver()
-        # browser.implicitly_wait(10)
-        # login(browser)
-        # search_bar(browser)
-        # direct_quickExport(browser)
-        df = pd.read_csv('student_export.txt', sep="\t") # Read csv file on args.filepath
+        browser = create_driver()
+        browser.implicitly_wait(10)
+        login(browser)
+        search_bar(browser)
+        direct_quickExport(browser)
+        df = pd.read_csv('student_export.txt', sep="\t") 
         data_map = {
             'student_number':'student_number',
             'lastfirst':'lastfirst',
@@ -63,13 +63,13 @@ def main():
             '^(*gpa method="Weighted" format=##0.00 grade="9,10,11,12")':'Cumulative_Weighted_GPA',
         }
         df.rename(columns=data_map, inplace=True)
-        conn = Connection() # Send commands and receive back information
-        conn.insert_into("PS_GPA", df) # Insert coonections to the PS_GPA table
+        conn = Connection() 
+        conn.insert_into("PS_GPA", df) 
         print("success")
     except Exception as e:
         print(e)
-    # finally:
-    #     close(browser)
+    finally:
+        close(browser)
 
 
 if __name__ == "__main__":
