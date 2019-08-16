@@ -1,0 +1,83 @@
+import os
+import logging
+import time
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import data_map
+from contextlib import AbstractContextManager
+
+
+class BrowserSession(AbstractContextManager):
+    def __init__(self):
+        host = os.getenv("PS_URL")
+        self.LOGIN_URL = f"{host}/pw.html"
+        self.QE_URL = f"{host}/importexport/exportstudents.html?dothisfor=selected"
+        self.PS_USER = os.getenv("PS_USER")
+        self.PS_PWD = os.getenv("PS_PWD")
+        self.export_query = data_map.keys
+        self.browser = self.create_driver()
+
+    def __enter__(self):
+        self.browser.implicitly_wait(10)
+        self.login()
+        return self
+
+    def __exit__(self, *exc_details):
+        self.browser.close()
+
+    def create_driver(self):
+        profile = webdriver.FirefoxProfile()
+        profile.set_preference("browser.download.folderList", 2)
+        profile.set_preference("browser.download.dir", os.getcwd())
+        profile.set_preference("browser.download.manager.showWhenStarting", False)
+        profile.set_preference(
+            "browser.helperApps.neverAsk.saveToDisk", "text/ps-export"
+        )
+        profile.set_preference("browser.download.usedownloaddir", False)
+        return webdriver.Firefox(firefox_profile=profile)
+
+    def login(self):
+        self.browser.get(self.LOGIN_URL)
+        user_field = self.browser.find_element_by_id("fieldUsername")
+        user_field.send_keys(self.PS_USER)
+        pwd_field = self.browser.find_element_by_id("fieldPassword")
+        pwd_field.send_keys(self.PS_PWD)
+        submit_button = self.browser.find_element_by_id("btnEnter")
+        submit_button.click()
+        time.sleep(5)
+        logging.info("logged in successfully")
+
+    def search_students(self):
+        search_bar = self.browser.find_element_by_id("studentSearchInput")
+        search_bar.clear()
+        search_term = os.getenv("SEARCH")
+        search_bar.send_keys(search_term)
+        search_button = self.browser.find_element_by_id("searchButton")
+        search_button.click()
+        time.sleep(5)
+        logging.info("entered search query successfully")
+
+    def _enter_text(self, element, line):
+        element.send_keys(line)
+        element.send_keys(Keys.ENTER)
+
+    def _quick_export_query(self, element):
+        element.clear()
+        for line in self.export_query:
+            self._enter_text(element, line)
+
+    def _wait_on_filestream(self):
+        time.sleep(20)
+        while os.path.exists("student.export.text.part"):
+            time.sleep(5)
+
+    def quick_export_gpa(self):
+        self.browser.get(self.QE_URL)
+        text_box = self.browser.find_element_by_id("tt")
+        self._quick_export_query(text_box)
+        time.sleep(5)
+        submit_btn = self.browser.find_element_by_id("btnSubmit")
+        submit_btn.click()
+        self._wait_on_filestream()
+        logging.info("finished downloading file")
+
