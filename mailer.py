@@ -8,6 +8,7 @@ SLACK_EMAIL = os.getenv("SLACK_EMAIL")
 
 
 def notify(error=False, error_message=None, success_message=None):
+    """Send email message with success or error notification"""
     server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
     server.login(GMAIL_USER, GMAIL_PWD)
     if error:
