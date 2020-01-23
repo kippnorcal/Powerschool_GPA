@@ -9,6 +9,7 @@ from contextlib import AbstractContextManager
 
 class BrowserSession(AbstractContextManager):
     def __init__(self):
+        """Initialize session with needed variables"""
         host = os.getenv("PS_URL")
         self.LOGIN_URL = f"{host}/pw.html"
         self.QE_URL = f"{host}/importexport/exportstudents.html?dothisfor=selected"
@@ -18,14 +19,17 @@ class BrowserSession(AbstractContextManager):
         self.browser = self.create_driver()
 
     def __enter__(self):
+        """Creates a context manager which starts the browser session"""
         self.browser.implicitly_wait(10)
         self.login()
         return self
 
     def __exit__(self, *exc_details):
+        """Exit the context manger and close the browser session"""
         self.browser.close()
 
     def create_driver(self):
+        """Set configuration options for browser session"""
         profile = webdriver.FirefoxProfile()
         profile.set_preference("browser.download.folderList", 2)
         profile.set_preference("browser.download.dir", os.getcwd())
@@ -37,6 +41,7 @@ class BrowserSession(AbstractContextManager):
         return webdriver.Firefox(firefox_profile=profile)
 
     def login(self):
+        """Log in to PowerSchool with provided credentials"""
         self.browser.get(self.LOGIN_URL)
         user_field = self.browser.find_element_by_id("fieldUsername")
         user_field.send_keys(self.PS_USER)
@@ -48,6 +53,7 @@ class BrowserSession(AbstractContextManager):
         logging.info("logged in successfully")
 
     def search_students(self):
+        """Use the PowerSchool student search to find the specified student types"""
         search_bar = self.browser.find_element_by_id("studentSearchInput")
         search_bar.clear()
         search_term = os.getenv("SEARCH")
@@ -58,20 +64,24 @@ class BrowserSession(AbstractContextManager):
         logging.info("entered search query successfully")
 
     def _enter_text(self, element, line):
+        """Type text into a field and press enter"""
         element.send_keys(line)
         element.send_keys(Keys.ENTER)
 
     def _quick_export_query(self, element):
+        """Add a quick export query text to a browser element"""
         element.clear()
         for line in self.export_query:
             self._enter_text(element, line)
 
     def _wait_on_filestream(self):
+        """Wait for the file to finishe downloading"""
         time.sleep(20)
         while os.path.exists("student.export.text.part"):
             time.sleep(5)
 
     def quick_export_gpa(self):
+        """Main function used to export the GPA data from PowerSchool to a file"""
         self.browser.get(self.QE_URL)
         text_box = self.browser.find_element_by_id("tt")
         self._quick_export_query(text_box)
