@@ -39,19 +39,19 @@ $ docker build -t ps_gpa .
 6. Create .env file with project secrets
 
 ```
-PS_USER=
-PS_PWD=
-SERVER_IP=
+DB_SERVER=
 DB=
-USER=
-PWD=
+DB_USER=
+DB_PWD=
+DB_SCHEMA=
 GMAIL_USER=
 GMAIL_PWD=
 SLACK_EMAIL=
+PS_USER=
+PS_PWD=
 PS_URL=
 SEARCH=
 METHOD=
-QE_URL=
 ```
 
 ### Running the Job
