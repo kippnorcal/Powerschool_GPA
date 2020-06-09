@@ -2,7 +2,10 @@ import os
 import logging
 import time
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 import data_map
 from contextlib import AbstractContextManager
 
@@ -54,11 +57,15 @@ class BrowserSession(AbstractContextManager):
 
     def search_students(self):
         """Use the PowerSchool student search to find the specified student types"""
-        search_bar = self.browser.find_element_by_id("studentSearchInput")
+        search_bar = WebDriverWait(self.browser, 30).until(
+            EC.element_to_be_clickable((By.ID, "studentSearchInput"))
+        )
+        self.browser.save_screenshot("1-studentSearchInput.png")
         search_bar.clear()
         search_term = os.getenv("SEARCH")
         search_bar.send_keys(search_term)
         search_button = self.browser.find_element_by_id("searchButton")
+        self.browser.save_screenshot("2-searchButton.png")
         search_button.click()
         time.sleep(5)
         logging.info("entered search query successfully")
@@ -75,7 +82,7 @@ class BrowserSession(AbstractContextManager):
             self._enter_text(element, line)
 
     def _wait_on_filestream(self):
-        """Wait for the file to finishe downloading"""
+        """Wait for the file to finish downloading"""
         time.sleep(20)
         while os.path.exists("student.export.text.part"):
             time.sleep(5)
@@ -84,10 +91,12 @@ class BrowserSession(AbstractContextManager):
         """Main function used to export the GPA data from PowerSchool to a file"""
         self.browser.get(self.QE_URL)
         text_box = self.browser.find_element_by_id("tt")
+        self.browser.save_screenshot("3-tt.png")
         self._quick_export_query(text_box)
         time.sleep(5)
         submit_btn = self.browser.find_element_by_id("btnSubmit")
         submit_btn.click()
+        self.browser.save_screenshot("4-btnSubmit.png")
         self._wait_on_filestream()
+        self.browser.save_screenshot("5-wait_on_filestream.png")
         logging.info("finished downloading file")
-
