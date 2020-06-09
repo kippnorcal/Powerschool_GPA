@@ -1,25 +1,58 @@
-import smtplib
-import os
+import email, smtplib, ssl
+from os import getenv
+import glob
+
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
-GMAIL_USER = os.getenv("GMAIL_USER")
-GMAIL_PWD = os.getenv("GMAIL_PWD")
-SLACK_EMAIL = os.getenv("SLACK_EMAIL")
+class Mailer:
+    def __init__(self, jobname):
+        self.user = getenv("GMAIL_USER")
+        self.password = getenv("GMAIL_PWD")
+        self.slack_email = getenv("SLACK_EMAIL")
+        context = ssl.create_default_context()
+        self.server = smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context)
+        self.from_address = "KIPP Bay Area Job Notification"
+        self.to_address = "databot"
+        self.jobname = jobname
 
+    def _subject_line(self):
+        subject_type = "Error" if self.error else "Success"
+        return f"{self.jobname} - {subject_type}"
 
-def notify(error=False, error_message=None, success_message=None):
-    """Send email message with success or error notification"""
-    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-    server.login(GMAIL_USER, GMAIL_PWD)
-    if error:
-        subject = "PS GPA - Error"
-        text = f"The PowerSchool GPA Selenium script encountered an error:\n{error_message}"
-        message = f"Subject: {subject}\n\n{text}"
-    else:
-        subject = "PS GPA - Success"
-        text = (
-            f"The PowerSchool GPA Selenium script ran successfully.\n{success_message}"
-        )
-        message = f"Subject: {subject}\n\n{text}"
-    server.sendmail(GMAIL_USER, SLACK_EMAIL, message)
-    server.quit()
+    def _body_text(self):
+        if self.error:
+            return f"{self.jobname} encountered an error:\n{self.message}"
+        else:
+            return f"{self.jobname} completed successfully.\n{self.message}"
+
+    def _attachments(self, msg):
+        filenames = glob.glob("*.png")
+        for filename in filenames:
+            with open(filename, "rb") as attachment:
+                part = MIMEBase("application", "octet-stream")
+                part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            part.add_header("Content-Disposition", f"attachment; filename= {filename}")
+            msg.attach(part)
+
+    def _message(self, attachments=False):
+        msg = MIMEMultipart()
+        msg["Subject"] = self._subject_line()
+        msg["From"] = self.from_address
+        msg["To"] = self.to_address
+        msg.attach(MIMEText(self._body_text(), "plain"))
+        if attachments:
+            self._attachments(msg)
+        return msg.as_string()
+
+    def notify(self, error=False, message=None):
+        self.error = error
+        self.message = message
+        with self.server as s:
+            s.login(self.user, self.password)
+            msg = self._message(attachments=error)
+            s.sendmail(self.user, self.slack_email, msg)

@@ -9,7 +9,7 @@ from sqlsorcery import MSSQL
 
 from browser import BrowserSession
 import data_map
-from mailer import notify
+from mailer import Mailer
 
 
 logging.basicConfig(
@@ -43,6 +43,7 @@ def insert_table(df, tablename):
 
 def main():
     try:
+        mailer = Mailer("PS GPA")
         with BrowserSession() as b:
             b.search_students()
             b.quick_export_gpa()
@@ -51,13 +52,13 @@ def main():
         insert_table(df, "PS_GPA")
 
         success_message = read_logs("app.log")
-        notify(success_message=success_message)
+        mailer.notify(message=success_message)
     except Exception as e:
         logging.error(e)
         stack_trace = traceback.format_exc()
         log_info = read_logs("app.log")
         error_message = f"{log_info}\n\n{stack_trace}"
-        notify(error=True, error_message=error_message)
+        mailer.notify(error=True, message=error_message)
 
 
 if __name__ == "__main__":
