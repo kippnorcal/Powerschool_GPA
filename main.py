@@ -1,3 +1,4 @@
+import glob
 import os
 import time
 import logging
@@ -14,10 +15,18 @@ from mailer import notify
 
 logging.basicConfig(
     filename="app.log",
+    filemode="w",
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s: %(message)s",
     datefmt="%Y-%m-%d %I:%M:%S%p",
 )
+
+
+def remove_old_files():
+    export_files = glob.glob("student.export*")
+    if len(export_files) > 0:
+        for export_file in export_files:
+            os.remove(export_file)
 
 
 def create_df(filename):
@@ -43,6 +52,8 @@ def insert_table(df, tablename):
 
 def main():
     try:
+        remove_old_files()
+
         with BrowserSession() as b:
             b.search_students()
             b.quick_export_gpa()
